@@ -1,6 +1,11 @@
 <?php
+use yii\helpers\ArrayHelper;
 
-$params = require(__DIR__ . '/params.php');
+    /*механизм склейки файлов*/
+$params = ArrayHelper::merge(
+    require(__DIR__ . '/params.php'),
+    require(__DIR__ . '/params-local.php')
+);
 
 $config = [
     'id' => 'basic',
