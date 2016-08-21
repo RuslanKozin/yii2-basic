@@ -87,5 +87,10 @@ class User extends \yii\db\ActiveRecord
             self::STATUS_WAIT => 'Ожидает подтверждения',
         ];
     }
-
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className(),
+        ];
+    }
 }
