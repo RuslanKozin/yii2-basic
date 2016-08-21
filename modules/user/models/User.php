@@ -43,10 +43,19 @@ class User extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_at', 'updated_at', 'username', 'password_hash', 'email'], 'required'],
-            [['created_at', 'updated_at', 'status'], 'integer'],
-            [['username', 'email_confirm_token', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
-            [['auth_key'], 'string', 'max' => 32],
+            ['username', 'required'],
+            ['username', 'match', 'pattern' => '#^[\w_-]+$#i'],
+            ['username', 'unique', 'targetClass' => self::className(), 'message' => 'This username has already been taken.'],
+            ['username', 'string', 'min' => 2, 'max' => 255],
+
+            ['email', 'required'],
+            ['email', 'email'],
+            ['email', 'unique', 'targetClass' => self::className(), 'message' => 'This email address has already been taken.'],
+            ['email', 'string', 'max' => 255],
+
+            ['status', 'integer'],
+            ['status', 'default', 'value' => self::STATUS_ACTIVE],
+            ['status', 'in', 'range' => array_keys(self::getStatusesArray())],
         ];
     }
 
@@ -57,15 +66,11 @@ class User extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-            'username' => 'Username',
-            'auth_key' => 'Auth Key',
-            'email_confirm_token' => 'Email Confirm Token',
-            'password_hash' => 'Password Hash',
-            'password_reset_token' => 'Password Reset Token',
+            'created_at' => 'Создан',
+            'updated_at' => 'Обновлён',
+            'username' => 'Имя пользователя',
             'email' => 'Email',
-            'status' => 'Status',
+            'status' => 'Статус',
         ];
     }
 
