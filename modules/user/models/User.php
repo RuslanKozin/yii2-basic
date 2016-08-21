@@ -143,6 +143,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return Yii::$app->security->validatePassword($password, $this->password_hash);
     }
 
+/* .............. Генерируем хэш пароль и авто. аутентификацию ........ */
     /**
      * @param string $password
      */
@@ -169,5 +170,64 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         }
         return false;
     }
+/* ........................................................................ */
+
+/* .......... Добавим методы для генерации хеша и поиска по нему .....  */
+        /*Теперь добавим возможность смены пароля. Для этого у нас предусмотрено
+        поле password_reset_token. При запросе восстановления мы в это поле будем
+        записывать уникальную случайную строку с временной меткой и посылать по
+        электронной почте ссылку с этим хешэм на контроллер с действием активаци.
+        А в контроллере уже найдём этого пользователя по данному хешу и поменяем ему пароль.*/
+    /**
+     * Finds user by password reset token
+     *
+     * @param string $token password reset token
+     * @return static|null
+     */
+    public static function findByPasswordResetToken($token)
+    {
+        if (!static::isPasswordResetTokenValid($token)) {
+            return null;
+        }
+        return static::findOne([
+            'password_reset_token' => $token,
+            'status' => self::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Finds out if password reset token is valid
+     *
+     * @param string $token password reset token
+     * @return boolean
+     */
+    public static function isPasswordResetTokenValid($token)
+    {
+        if (empty($token)) {
+            return false;
+        }
+        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
+        $parts = explode('_', $token);
+        $timestamp = (int) end($parts);
+        return $timestamp + $expire >= time();
+    }
+
+    /**
+     * Generates new password reset token
+     */
+    public function generatePasswordResetToken()
+    {
+        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+    }
+
+    /**
+     * Removes password reset token
+     */
+    public function removePasswordResetToken()
+    {
+        $this->password_reset_token = null;
+    }
+/* .......................................................................... */
+
 
 }
