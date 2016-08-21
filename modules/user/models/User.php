@@ -229,5 +229,35 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     }
 /* .......................................................................... */
 
+/* .............. Подтверждение адреса электронной почты ............... */
+    /*Для регистрирующихся пользователей не помешает сделать подтверждение
+    адреса электронной почты. Для этой цели добавим несколько методов для
+    управления email_confirm_token. При регистрации мы будем присваивать
+    пользователю статус STATUS_WAIT, генерировать ключ и отправлять ссылку с ключом на почту.
+    А в контроллере (при переходе по этой ссылке) найдём пользователя по ключу и активируем*/
+    /**
+     * @param string $email_confirm_token
+     * @return static|null
+     */
+    public static function findByEmailConfirmToken($email_confirm_token)
+    {
+        return static::findOne(['email_confirm_token' => $email_confirm_token, 'status' => self::STATUS_WAIT]);
+    }
 
+    /**
+     * Generates email confirmation token
+     */
+    public function generateEmailConfirmToken()
+    {
+        $this->email_confirm_token = Yii::$app->security->generateRandomString();
+    }
+
+    /**
+     * Removes email confirmation token
+     */
+    public function removeEmailConfirmToken()
+    {
+        $this->email_confirm_token = null;
+    }
+/* .......................................................................... */
 }
