@@ -3,6 +3,11 @@
 namespace app\modules\user\models;
 
 use Yii;
+use yii\base\NotSupportedException;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
+
 
 /**
  * This is the model class for table "keys_user".
@@ -23,6 +28,10 @@ class User extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    const STATUS_BLOCKED = 0;
+    const STATUS_ACTIVE = 1;
+    const STATUS_WAIT = 2;
+
     public static function tableName()
     {
         return 'keys_user';
@@ -59,4 +68,19 @@ class User extends \yii\db\ActiveRecord
             'status' => 'Status',
         ];
     }
+
+    public function getStatusName()
+    {
+        return ArrayHelper::getValue(self::getStatusesArray(), $this->status);
+    }
+
+    public static function getStatusesArray()
+    {
+        return [
+            self::STATUS_BLOCKED => 'Заблокирован',
+            self::STATUS_ACTIVE => 'Активен',
+            self::STATUS_WAIT => 'Ожидает подтверждения',
+        ];
+    }
+
 }
